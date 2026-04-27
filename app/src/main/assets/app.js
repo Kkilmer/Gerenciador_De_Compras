@@ -424,6 +424,9 @@ function renderDashboardOverview(data) {
             warm: false
         }))
     );
+
+    renderMarketHistoricalRanking(data.marketHistoricalRanking || []);
+    renderPriceAlerts(data.priceAlerts || {});
 }
 
 function renderMonthVsPrevious(data) {
@@ -485,6 +488,82 @@ function renderMonthVsPrevious(data) {
             productContainer.appendChild(card);
         });
     }
+}
+
+function renderMarketHistoricalRanking(entries) {
+    const container = document.getElementById("marketHistoricalRankingContainer");
+    if (!container) {
+        return;
+    }
+
+    if (!entries.length) {
+        container.textContent = "Salve compras em mais mercados para gerar o ranking.";
+        return;
+    }
+
+    container.innerHTML = "";
+    entries.forEach((entry, index) => {
+        const card = document.createElement("div");
+        card.className = `history-card ranking-card${index === 0 ? " highlight-card" : ""}`;
+        card.innerHTML = `
+            <div class="ranking-header">
+                <strong>${entry.position}. ${entry.market}</strong>
+                <span class="ranking-score">Score ${entry.score.toFixed(2)}</span>
+            </div>
+            <span>Média de gasto: ${currencyFormatter.format(entry.averageSpend)}</span>
+            <span>Vezes mais barato: ${entry.timesCheapest}</span>
+            <span>Média normalizada: ${entry.normalizedAverageSpend.toFixed(2)}</span>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function renderPriceAlerts(data) {
+    const summaryContainer = document.getElementById("priceAlertsSummary");
+    const attentionContainer = document.getElementById("priceAttentionList");
+    if (!summaryContainer || !attentionContainer) {
+        return;
+    }
+
+    const increaseCount = data.increaseCount || 0;
+    const decreaseCount = data.decreaseCount || 0;
+    const attentionList = data.attentionList || [];
+
+    summaryContainer.innerHTML = `
+        <article class="alert-card alert-up">
+            <span>Aumentaram mais de 20%</span>
+            <strong>${increaseCount}</strong>
+        </article>
+        <article class="alert-card alert-down">
+            <span>Diminuíram mais de 20%</span>
+            <strong>${decreaseCount}</strong>
+        </article>
+    `;
+
+    if (!attentionList.length) {
+        attentionContainer.textContent = "Sem alertas fortes no momento.";
+        return;
+    }
+
+    attentionContainer.innerHTML = "";
+    attentionList.forEach((entry) => {
+        const card = document.createElement("div");
+        const isIncrease = entry.alertType === "aumento";
+        card.className = `history-card attention-card ${isIncrease ? "attention-up" : "attention-down"}`;
+        card.innerHTML = `
+            <div class="ranking-header">
+                <strong>${entry.product}</strong>
+                <span class="attention-tag ${isIncrease ? "attention-tag-up" : "attention-tag-down"}">
+                    ${isIncrease ? "Atenção" : "Oportunidade"}
+                </span>
+            </div>
+            <span>Status: ${isIncrease ? "aumentou mais de 20%" : "diminuiu mais de 20%"}</span>
+            <span>Média anterior: ${currencyFormatter.format(entry.previousAverage)}</span>
+            <span>Média atual: ${currencyFormatter.format(entry.currentAverage)}</span>
+            <span>Variação: ${formatSignedCurrency(entry.difference)} (${formatSignedPercent(entry.differencePercent)})</span>
+        `;
+        attentionContainer.appendChild(card);
+    });
 }
 
 function renderBarChart(container, items) {

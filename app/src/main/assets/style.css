@@ -156,6 +156,13 @@ h3 {
     border: 1px solid rgba(90, 67, 48, 0.1);
 }
 
+.subpanel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+}
+
 .dashboard-overview-panel {
     display: grid;
     gap: 18px;
@@ -164,6 +171,12 @@ h3 {
 .overview-metrics {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.alerts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 12px;
 }
 
@@ -184,6 +197,39 @@ h3 {
 .metric-card strong {
     font-size: 20px;
     line-height: 1.2;
+}
+
+.alert-card {
+    padding: 16px;
+    border-radius: 20px;
+    border: 1px solid rgba(87, 65, 46, 0.12);
+    background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(246,239,227,0.9));
+}
+
+.alert-card span {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.alert-card strong {
+    font-size: 26px;
+    line-height: 1;
+}
+
+.alert-up {
+    border-color: rgba(183, 72, 59, 0.18);
+    background: linear-gradient(135deg, rgba(255, 247, 246, 0.96), rgba(255, 235, 232, 0.9));
+}
+
+.alert-down {
+    border-color: rgba(17, 122, 88, 0.18);
+    background: linear-gradient(135deg, rgba(245, 255, 251, 0.96), rgba(232, 247, 240, 0.9));
+}
+
+.alert-neutral {
+    background: rgba(255, 255, 255, 0.72);
 }
 
 .panel-header,
@@ -425,6 +471,72 @@ button:hover {
     font-size: 17px;
 }
 
+.ranking-copy {
+    margin-bottom: 0;
+    font-size: 14px;
+}
+
+.ranking-card {
+    display: grid;
+    gap: 6px;
+}
+
+.ranking-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.ranking-score {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 82px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(17, 122, 88, 0.12);
+    color: var(--accent-strong);
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.attention-card {
+    display: grid;
+    gap: 6px;
+}
+
+.attention-up {
+    border-color: rgba(183, 72, 59, 0.22);
+    background: rgba(183, 72, 59, 0.06);
+}
+
+.attention-down {
+    border-color: rgba(17, 122, 88, 0.22);
+    background: rgba(17, 122, 88, 0.06);
+}
+
+.attention-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 96px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.attention-tag-up {
+    background: rgba(183, 72, 59, 0.12);
+    color: var(--danger);
+}
+
+.attention-tag-down {
+    background: rgba(17, 122, 88, 0.12);
+    color: var(--accent-strong);
+}
+
 .comparison-toolbar,
 .comparison-grid,
 .history-filters {
@@ -496,6 +608,12 @@ button:hover {
 
     .item-row {
         gap: 12px;
+    }
+
+    .ranking-header {
+        align-items: flex-start;
+        grid-template-columns: 1fr;
+        display: grid;
     }
 
     #totalPurchaseValue {

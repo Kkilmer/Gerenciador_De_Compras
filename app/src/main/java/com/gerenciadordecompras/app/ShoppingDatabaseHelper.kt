@@ -552,6 +552,7 @@ class ShoppingDatabaseHelper(context: Context) :
         val monthlyComparison = monthlyComparison(referenceMonth)
         val productChanges = compareWithPreviousMonth(referenceMonth)
         val bestMarket = monthlyComparison.optJSONObject("bestMarket")
+        val priceAlerts = buildPriceAlerts(productChanges.optJSONArray("productChanges") ?: JSONArray())
 
         return JSONObject()
             .put("currentMonth", referenceMonth)
@@ -564,6 +565,8 @@ class ShoppingDatabaseHelper(context: Context) :
             .put("biggestDrop", productChanges.optJSONObject("biggestDrop"))
             .put("monthlySpendingTrend", getMonthlySpendingTrend())
             .put("marketBars", monthlyComparison.optJSONArray("markets") ?: JSONArray())
+            .put("marketHistoricalRanking", getMarketHistoricalRanking())
+            .put("priceAlerts", priceAlerts)
     }
 
     fun getMonthlySpendingTrend(): JSONArray {
@@ -588,6 +591,102 @@ class ShoppingDatabaseHelper(context: Context) :
                         .put("purchaseCount", cursor.getInt(2))
                 )
             }
+        }
+        return result
+    }
+
+    fun getMarketHistoricalRanking(): JSONArray {
+        data class MarketStat(
+            val market: String,
+            val averageSpend: Double,
+            var timesCheapest: Int = 0
+        )
+
+        val stats = linkedMapOf<String, MarketStat>()
+        readableDatabase.rawQuery(
+            """
+            SELECT
+                m.name,
+                AVG(p.total_amount) AS average_spend
+            FROM purchases p
+            INNER JOIN markets m ON m.id = p.market_id
+            GROUP BY m.name
+            HAVING COUNT(p.id) > 0
+            ORDER BY m.name COLLATE NOCASE ASC
+            """.trimIndent(),
+            null
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                val marketName = cursor.getString(0)
+                val averageSpend = cursor.getDouble(1)
+                stats[marketName] = MarketStat(
+                    market = marketName,
+                    averageSpend = averageSpend
+                )
+            }
+        }
+
+        if (stats.isEmpty()) {
+            return JSONArray()
+        }
+
+        val monthlyTotals = linkedMapOf<String, MutableList<Pair<String, Double>>>()
+        readableDatabase.rawQuery(
+            """
+            SELECT
+                p.reference_month,
+                m.name,
+                SUM(p.total_amount) AS month_total
+            FROM purchases p
+            INNER JOIN markets m ON m.id = p.market_id
+            GROUP BY p.reference_month, m.name
+            ORDER BY p.reference_month ASC, month_total ASC, m.name ASC
+            """.trimIndent(),
+            null
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                val referenceMonth = cursor.getString(0)
+                val marketName = cursor.getString(1)
+                val monthTotal = cursor.getDouble(2)
+                monthlyTotals.getOrPut(referenceMonth) { mutableListOf() }
+                    .add(marketName to monthTotal)
+            }
+        }
+
+        monthlyTotals.values.forEach { monthEntries ->
+            val lowestTotal = monthEntries.minOfOrNull { it.second } ?: 0.0
+            monthEntries.forEach { (marketName, monthTotal) ->
+                if (monthTotal <= lowestTotal + 0.0001) {
+                    stats[marketName]?.timesCheapest = stats[marketName]?.timesCheapest?.plus(1) ?: 0
+                }
+            }
+        }
+
+        val maxAverageSpend = stats.values.maxOfOrNull { it.averageSpend } ?: 0.0
+        val rankedMarkets = stats.values.map { stat ->
+            val normalizedAverage = if (maxAverageSpend == 0.0) {
+                0.0
+            } else {
+                stat.averageSpend / maxAverageSpend
+            }
+
+            JSONObject()
+                .put("market", stat.market)
+                .put("averageSpend", stat.averageSpend)
+                .put("timesCheapest", stat.timesCheapest)
+                .put("normalizedAverageSpend", normalizedAverage)
+                .put("score", (stat.timesCheapest * 2.0) - normalizedAverage)
+        }.sortedWith(
+            compareByDescending<JSONObject> { it.optDouble("score") }
+                .thenByDescending { it.optInt("timesCheapest") }
+                .thenBy { it.optDouble("averageSpend") }
+                .thenBy { it.optString("market") }
+        )
+
+        val result = JSONArray()
+        rankedMarkets.forEachIndexed { index, entry ->
+            entry.put("position", index + 1)
+            result.put(entry)
         }
         return result
     }
@@ -657,6 +756,48 @@ class ShoppingDatabaseHelper(context: Context) :
             }
         }
         return null
+    }
+
+    private fun buildPriceAlerts(productChanges: JSONArray): JSONObject {
+        val increased = mutableListOf<JSONObject>()
+        val decreased = mutableListOf<JSONObject>()
+
+        for (index in 0 until productChanges.length()) {
+            val item = productChanges.getJSONObject(index)
+            val previousAverage = item.optDouble("previousAverage", 0.0)
+            val currentAverage = item.optDouble("currentAverage", 0.0)
+            val differencePercent = item.optDouble("differencePercent", 0.0)
+
+            if (previousAverage <= 0.0 || currentAverage <= 0.0) {
+                continue
+            }
+
+            if (differencePercent >= 20.0) {
+                increased += JSONObject(item.toString()).put("alertType", "aumento")
+            } else if (differencePercent <= -20.0) {
+                decreased += JSONObject(item.toString()).put("alertType", "queda")
+            }
+        }
+
+        val sortedAttention = (increased + decreased).sortedByDescending {
+            kotlin.math.abs(it.optDouble("differencePercent"))
+        }
+
+        val increasedArray = JSONArray()
+        increased.sortedByDescending { it.optDouble("differencePercent") }.forEach(increasedArray::put)
+
+        val decreasedArray = JSONArray()
+        decreased.sortedBy { it.optDouble("differencePercent") }.forEach(decreasedArray::put)
+
+        val attentionArray = JSONArray()
+        sortedAttention.forEach(attentionArray::put)
+
+        return JSONObject()
+            .put("increaseCount", increased.size)
+            .put("decreaseCount", decreased.size)
+            .put("increased", increasedArray)
+            .put("decreased", decreasedArray)
+            .put("attentionList", attentionArray)
     }
 
     private fun normalizeProductName(value: String): String {
