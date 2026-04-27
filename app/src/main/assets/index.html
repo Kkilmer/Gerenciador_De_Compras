@@ -13,8 +13,8 @@
                 <p class="eyebrow">Controle mensal</p>
                 <h1>Gerenciador de Compras</h1>
                 <p class="hero-copy">
-                    Registre compras por mercado, acompanhe o mês atual e compare os preços
-                    dos produtos para descobrir onde compensa mais comprar.
+                    Anote suas compras do mês, veja quanto gastou e compare mercados sem
+                    complicação.
                 </p>
             </div>
             <div class="hero-stats">
@@ -31,13 +31,35 @@
                     <strong id="heroMarketCount">0</strong>
                 </article>
             </div>
+            <div class="quick-guide">
+                <article class="guide-step">
+                    <strong>1. Escolha o mercado</strong>
+                    <span>Cadastre o mercado se ainda não estiver na lista.</span>
+                </article>
+                <article class="guide-step">
+                    <strong>2. Adicione os produtos</strong>
+                    <span>Informe quantidade e preço para cada item.</span>
+                </article>
+                <article class="guide-step">
+                    <strong>3. Salve e compare</strong>
+                    <span>Veja o histórico, os gráficos e os meses lado a lado.</span>
+                </article>
+            </div>
         </section>
 
-        <section class="panel dashboard-overview-panel">
+        <nav class="quick-nav" aria-label="Atalhos da tela">
+            <button type="button" class="quick-nav-btn" data-scroll-target="purchaseSection">Registrar</button>
+            <button type="button" class="quick-nav-btn" data-scroll-target="historySection">Histórico</button>
+            <button type="button" class="quick-nav-btn" data-scroll-target="comparisonSection">Comparar</button>
+            <button type="button" class="quick-nav-btn" data-scroll-target="dashboardSection">Dashboard</button>
+        </nav>
+
+        <section id="dashboardSection" class="panel dashboard-overview-panel">
             <div class="panel-header">
                 <div>
                     <p class="section-kicker">Dashboard geral</p>
                     <h2>Visão do mês</h2>
+                    <p class="section-helper">Um resumo rápido para entender o que mudou no período.</p>
                 </div>
                 <span class="muted">Resumo executivo do período atual</span>
             </div>
@@ -121,11 +143,12 @@
 
         <section class="dashboard-grid">
             <div class="main-column">
-                <section class="panel featured-panel">
+                <section id="purchaseSection" class="panel featured-panel">
                     <div class="panel-header">
                         <div>
                             <p class="section-kicker">Lançamento</p>
                             <h2>Cadastro de compra</h2>
+                            <p class="section-helper">Preencha o mês, escolha o mercado e lance os itens da compra.</p>
                         </div>
                         <span id="currentMonthBadge" class="month-badge"></span>
                     </div>
@@ -134,6 +157,8 @@
                         Editando uma compra salva.
                         <button id="cancelEditBtn" type="button">Cancelar edição</button>
                     </div>
+
+                    <div id="actionFeedback" class="feedback-banner hidden" role="status" aria-live="polite"></div>
 
                     <div class="grid">
                         <label>
@@ -148,16 +173,17 @@
                     </div>
 
                     <div class="market-inline">
-                        <input id="newMarketInput" type="text" placeholder="Cadastrar novo mercado">
-                        <button id="addMarketBtn" type="button">Adicionar mercado</button>
+                        <input id="newMarketInput" type="text" placeholder="Nome do novo mercado">
+                        <button id="addMarketBtn" type="button">Salvar mercado</button>
                     </div>
 
                     <div class="items-header">
                         <div>
                             <p class="section-kicker">Itens</p>
                             <h3>Produtos da compra</h3>
+                            <p class="section-helper">Inclua os produtos aos poucos. O total de cada item sai sozinho.</p>
                         </div>
-                        <button id="addItemBtn" type="button">Adicionar item</button>
+                        <button id="addItemBtn" type="button">Novo item</button>
                     </div>
 
                     <div id="itemsContainer" class="items-container"></div>
@@ -168,7 +194,8 @@
                             <strong id="totalPurchaseValue">R$ 0,00</strong>
                         </div>
                         <div class="action-row">
-                            <button id="calculateBtn" type="button">Calcular resumo</button>
+                            <button id="calculateBtn" type="button">Conferir totais</button>
+                            <button id="savePurchaseBtn" type="button">Salvar compra</button>
                         </div>
                     </div>
                 </section>
@@ -178,10 +205,11 @@
                         <div>
                             <p class="section-kicker">Análise rápida</p>
                             <h2>Resumo</h2>
+                            <p class="section-helper">Veja o total da compra e uma leitura inicial dos preços.</p>
                         </div>
                     </div>
                     <div id="summaryContainer" class="summary-card">
-                        Nenhum cálculo realizado ainda.
+                        Preencha a compra e toque em "Conferir totais" para ver o resumo.
                     </div>
                 </section>
 
@@ -190,6 +218,7 @@
                         <div>
                             <p class="section-kicker">Relatórios</p>
                             <h2>Exportar CSV</h2>
+                            <p class="section-helper">Baixe um relatório do mês ou de todo o histórico.</p>
                         </div>
                     </div>
                     <div class="export-grid">
@@ -199,7 +228,7 @@
                         </label>
                         <div class="action-row export-actions">
                             <button id="exportMonthCsvBtn" type="button">Exportar mês</button>
-                            <button id="exportAllCsvBtn" type="button">Exportar tudo</button>
+                            <button id="exportAllCsvBtn" type="button">Exportar histórico</button>
                         </div>
                     </div>
                     <div id="exportStatus" class="summary-card export-status">
@@ -209,13 +238,14 @@
             </div>
 
             <aside class="side-column">
-                <section class="panel compact-panel">
+                <section id="historySection" class="panel compact-panel">
                     <div class="panel-header">
                         <div>
                             <p class="section-kicker">Histórico</p>
                             <h2>Compras salvas</h2>
+                            <p class="section-helper">Use os filtros para encontrar uma compra com rapidez.</p>
                         </div>
-                        <button id="refreshHistoryBtn" type="button">Atualizar</button>
+                        <button id="refreshHistoryBtn" type="button">Recarregar</button>
                     </div>
                     <div class="history-filters">
                         <label>
@@ -231,22 +261,23 @@
                             <input id="historyProductFilter" type="text" placeholder="Ex.: arroz">
                         </label>
                         <div class="history-actions">
-                            <button id="applyHistoryFiltersBtn" type="button">Aplicar</button>
-                            <button id="clearHistoryFiltersBtn" type="button">Limpar</button>
+                            <button id="applyHistoryFiltersBtn" type="button">Filtrar</button>
+                            <button id="clearHistoryFiltersBtn" type="button">Limpar filtros</button>
                         </div>
                     </div>
                     <div id="historyContainer" class="history-list">
-                        Nenhuma compra salva ainda.
+                        Você ainda não salvou nenhuma compra.
                     </div>
                 </section>
             </aside>
         </section>
 
-        <section class="panel">
+        <section id="comparisonSection" class="panel">
             <div class="panel-header">
                 <div>
                     <p class="section-kicker">Comparativo</p>
                     <h2>Comparação do mês</h2>
+                    <p class="section-helper">Descubra qual mercado compensou mais no mês escolhido.</p>
                 </div>
                 <span class="muted">Veja qual mercado e produto compensam mais</span>
             </div>
@@ -256,11 +287,11 @@
                     <span>Mês para comparar</span>
                     <input id="comparisonMonthInput" type="month">
                 </label>
-                <button id="loadComparisonBtn" type="button">Comparar mês</button>
+                <button id="loadComparisonBtn" type="button">Ver comparação</button>
             </div>
 
             <div id="comparisonSummary" class="summary-card emphasis-card">
-                Escolha um mês e carregue a comparação.
+                Escolha um mês para comparar os mercados e os produtos.
             </div>
 
             <div class="comparison-grid">
@@ -287,6 +318,7 @@
                 <div>
                     <p class="section-kicker">Evolução</p>
                     <h2>Mês atual x mês anterior</h2>
+                    <p class="section-helper">Entenda se os preços e os gastos subiram ou caíram.</p>
                 </div>
                 <span class="muted">Entenda se os gastos subiram ou caíram</span>
             </div>

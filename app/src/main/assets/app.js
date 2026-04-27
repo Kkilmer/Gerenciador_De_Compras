@@ -9,6 +9,44 @@ const currencyFormatter = new Intl.NumberFormat("pt-BR", {
     currency: "BRL"
 });
 
+function showActionFeedback(message, type = "info") {
+    const banner = document.getElementById("actionFeedback");
+    if (!banner) {
+        return;
+    }
+
+    banner.textContent = message;
+    banner.classList.remove("hidden", "is-error", "is-success");
+    if (type === "error") {
+        banner.classList.add("is-error");
+    } else if (type === "success") {
+        banner.classList.add("is-success");
+    }
+}
+
+function hideActionFeedback() {
+    const banner = document.getElementById("actionFeedback");
+    if (!banner) {
+        return;
+    }
+
+    banner.textContent = "";
+    banner.classList.add("hidden");
+    banner.classList.remove("is-error", "is-success");
+}
+
+function scrollToSection(sectionId) {
+    const target = document.getElementById(sectionId);
+    if (!target) {
+        return;
+    }
+
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.querySelectorAll(".quick-nav-btn").forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.scrollTarget === sectionId);
+    });
+}
+
 function getCurrentMonthValue() {
     const now = new Date();
     const year = now.getFullYear();
@@ -98,15 +136,15 @@ function renderItems() {
         row.innerHTML = `
             <label>
                 <span>Produto</span>
-                <input type="text" value="${item.name}" data-index="${index}" data-field="name">
+                <input type="text" value="${item.name}" placeholder="Ex.: arroz 5kg" data-index="${index}" data-field="name">
             </label>
             <label>
                 <span>Quantidade</span>
-                <input type="number" min="0" step="1" value="${item.quantity}" data-index="${index}" data-field="quantity">
+                <input type="number" min="0" step="1" value="${item.quantity}" placeholder="1" data-index="${index}" data-field="quantity">
             </label>
             <label>
                 <span>Preço unitário</span>
-                <input type="number" min="0" step="0.01" value="${item.unitPrice}" data-index="${index}" data-field="unitPrice">
+                <input type="number" min="0" step="0.01" value="${item.unitPrice}" placeholder="0,00" data-index="${index}" data-field="unitPrice">
             </label>
             <div>
                 <span class="muted">Total do item</span>
@@ -138,35 +176,44 @@ function showSummary(data) {
     const hints = data.comparisonHints || [];
     const hintLines = hints.length
         ? hints.map((hint) =>
-            `Produto: ${hint.product}\nMenor preço visto: ${currencyFormatter.format(hint.lowestPriceSeen)}\nMaior preço visto: ${currencyFormatter.format(hint.highestPriceSeen)}`
+            `Produto: ${hint.product}\nMenor preço encontrado: ${currencyFormatter.format(hint.lowestPriceSeen)}\nMaior preço encontrado: ${currencyFormatter.format(hint.highestPriceSeen)}`
         ).join("\n\n")
-        : "Ainda não há comparação suficiente.";
+        : "Ainda não há dados suficientes para comparar esse produto.";
 
     summaryElement.textContent =
-        `Mercado: ${data.market}\n` +
-        `Mês: ${data.month}\n` +
-        `Itens: ${data.summary.itemCount}\n` +
-        `Total: ${currencyFormatter.format(data.totalPurchase)}\n\n` +
-        `Comparação inicial:\n${hintLines}`;
+        `Mercado escolhido: ${data.market}\n` +
+        `Mês da compra: ${data.month}\n` +
+        `Itens lançados: ${data.summary.itemCount}\n` +
+        `Total da compra: ${currencyFormatter.format(data.totalPurchase)}\n\n` +
+        `Leitura rápida dos preços:\n${hintLines}`;
 }
 
 function calculateSummary() {
     const payload = getPurchasePayload();
+    const validItems = payload.items.filter((item) => item.name?.trim());
+
+    if (!payload.month) {
+        showActionFeedback("Escolha o mês da compra antes de continuar.", "error");
+        return;
+    }
 
     if (!payload.market) {
-        alert("Selecione um mercado.");
+        showActionFeedback("Escolha um mercado para continuar.", "error");
         return;
     }
 
-    if (!payload.items.length) {
-        alert("Adicione pelo menos um produto.");
+    if (!validItems.length) {
+        showActionFeedback("Adicione pelo menos um produto com nome preenchido.", "error");
         return;
     }
+
+    hideActionFeedback();
 
     if (window.AndroidBridge && window.AndroidBridge.processMonthlyPurchase) {
         const rawResponse = window.AndroidBridge.processMonthlyPurchase(JSON.stringify(payload));
         const parsedResponse = JSON.parse(rawResponse);
         showSummary(parsedResponse);
+        showActionFeedback("Totais conferidos. Se estiver tudo certo, salve a compra.", "success");
         return;
     }
 
@@ -178,13 +225,30 @@ function calculateSummary() {
         summary: { itemCount: payload.items.length },
         comparisonHints: []
     });
+    showActionFeedback("Totais conferidos. Se estiver tudo certo, salve a compra.", "success");
 }
 
 function savePurchase() {
     const payload = getPurchasePayload();
+    const validItems = payload.items.filter((item) => item.name?.trim());
+
+    if (!payload.month) {
+        showActionFeedback("Escolha o mês da compra antes de salvar.", "error");
+        return;
+    }
+
+    if (!payload.market) {
+        showActionFeedback("Escolha um mercado antes de salvar.", "error");
+        return;
+    }
+
+    if (!validItems.length) {
+        showActionFeedback("Inclua pelo menos um produto antes de salvar.", "error");
+        return;
+    }
 
     if (!window.AndroidBridge || !window.AndroidBridge.savePurchase) {
-        alert("O salvamento local funciona no app Android.");
+        showActionFeedback("O salvamento local funciona no app Android.", "error");
         return;
     }
 
@@ -192,10 +256,11 @@ function savePurchase() {
         ? window.AndroidBridge.updatePurchase(String(state.editingPurchaseId), JSON.stringify(payload))
         : window.AndroidBridge.savePurchase(JSON.stringify(payload));
     const parsedResponse = JSON.parse(rawResponse);
-    alert(parsedResponse.message || "Compra salva.");
     clearForm();
+    showActionFeedback(parsedResponse.message || "Compra salva com sucesso.", "success");
     loadHistory();
     loadComparison(payload.month);
+    document.getElementById("summaryContainer").textContent = "Compra salva. Você pode lançar outra compra ou consultar o histórico.";
 }
 
 function loadMarkets() {
@@ -226,7 +291,7 @@ function loadHistory() {
     const filters = getHistoryFilters();
 
     if (!window.AndroidBridge || !window.AndroidBridge.getMonthlyHistory) {
-        historyContainer.textContent = "O histórico aparecerá no app Android.";
+        historyContainer.textContent = "O histórico completo aparece quando o app roda no Android.";
         return;
     }
 
@@ -236,7 +301,7 @@ function loadHistory() {
     const entries = JSON.parse(rawHistory);
 
     if (!entries.length) {
-        historyContainer.textContent = "Nenhuma compra encontrada para esse filtro.";
+        historyContainer.textContent = "Nenhuma compra encontrada com esses filtros.";
         return;
     }
 
@@ -285,6 +350,7 @@ function loadPurchaseForEdit(purchaseId) {
     document.getElementById("editBanner").classList.remove("hidden");
     renderItems();
     calculateSummary();
+    showActionFeedback("Compra carregada para edição. Faça as mudanças e salve novamente.", "success");
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -293,19 +359,20 @@ function deletePurchase(purchaseId) {
         return;
     }
 
-    const confirmed = window.confirm("Deseja excluir esta compra?");
+    const marketName = document.querySelector(`[data-delete="${purchaseId}"]`)?.closest(".history-card")?.querySelector("strong")?.textContent || "esta compra";
+    const confirmed = window.confirm(`Deseja excluir ${marketName}? Essa ação não pode ser desfeita.`);
     if (!confirmed) {
         return;
     }
 
     const rawResponse = window.AndroidBridge.deletePurchase(String(purchaseId));
     const response = JSON.parse(rawResponse);
-    alert(response.message || "Compra excluída.");
 
     if (state.editingPurchaseId === purchaseId) {
         clearForm();
     }
 
+    showActionFeedback(response.message || "Compra excluída com sucesso.", "success");
     loadHistory();
     loadComparison();
 }
@@ -316,7 +383,8 @@ function clearForm() {
     document.getElementById("monthInput").value = getCurrentMonthValue();
     document.getElementById("marketSelect").selectedIndex = 0;
     document.getElementById("editBanner").classList.add("hidden");
-    document.getElementById("summaryContainer").textContent = "Nenhum cálculo realizado ainda.";
+    document.getElementById("summaryContainer").textContent = "Preencha a compra e toque em \"Conferir totais\" para ver o resumo.";
+    hideActionFeedback();
     addItem({ name: "", quantity: 1, unitPrice: 0 });
 }
 
@@ -326,9 +394,9 @@ function renderMarketComparison(data) {
     const chartContainer = document.getElementById("marketComparisonChart");
 
     if (!data.markets || !data.markets.length) {
-        summaryContainer.textContent = `Nenhuma compra encontrada para ${data.month}.`;
-        marketContainer.textContent = "Sem dados ainda.";
-        chartContainer.textContent = "Sem gráfico ainda.";
+        summaryContainer.textContent = `Ainda não há compras salvas para ${data.month}.`;
+        marketContainer.textContent = "Salve compras nesse mês para comparar os mercados.";
+        chartContainer.textContent = "O gráfico aparece quando houver dados suficientes.";
         return;
     }
 
@@ -364,7 +432,7 @@ function renderProductComparison(products) {
     const container = document.getElementById("productComparisonContainer");
 
     if (!products.length) {
-        container.textContent = "Sem comparação de produtos para este mês.";
+        container.textContent = "Ainda não há produtos suficientes para comparar neste mês.";
         return;
     }
 
@@ -572,7 +640,7 @@ function renderBarChart(container, items) {
     }
 
     if (!items.length) {
-        container.textContent = "Sem gráfico ainda.";
+        container.textContent = "O gráfico aparece quando houver dados suficientes.";
         return;
     }
 
@@ -602,9 +670,9 @@ function renderLineChart(container, legendContainer, items) {
     }
 
     if (!items.length) {
-        container.textContent = "Sem gráfico ainda.";
+        container.textContent = "O gráfico aparece quando houver dados suficientes.";
         if (legendContainer) {
-            legendContainer.textContent = "Sem dados ainda.";
+            legendContainer.textContent = "Sem dados suficientes por enquanto.";
         }
         return;
     }
@@ -663,7 +731,7 @@ function loadComparison(month = document.getElementById("comparisonMonthInput").
 
     if (!window.AndroidBridge || !window.AndroidBridge.getMonthlyComparison) {
         document.getElementById("comparisonSummary").textContent =
-            "A comparação mensal completa aparece no app Android.";
+            "A comparação completa aparece quando o app roda no Android.";
         return;
     }
 
@@ -752,11 +820,10 @@ function registerEvents() {
     document.getElementById("cancelEditBtn").addEventListener("click", clearForm);
     document.getElementById("exportMonthCsvBtn").addEventListener("click", exportMonthlyCsv);
     document.getElementById("exportAllCsvBtn").addEventListener("click", exportAllCsv);
-    document.getElementById("calculateBtn").insertAdjacentHTML(
-        "afterend",
-        '<button id="savePurchaseBtn" type="button">Salvar compra</button>'
-    );
     document.getElementById("savePurchaseBtn").addEventListener("click", savePurchase);
+    document.querySelectorAll("[data-scroll-target]").forEach((button) => {
+        button.addEventListener("click", () => scrollToSection(button.dataset.scrollTarget));
+    });
 }
 
 function init() {
@@ -772,6 +839,9 @@ function init() {
     registerEvents();
     loadHistory();
     loadComparison(currentMonth);
+    document.querySelectorAll(".quick-nav-btn").forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.scrollTarget === "purchaseSection");
+    });
 }
 
 init();
