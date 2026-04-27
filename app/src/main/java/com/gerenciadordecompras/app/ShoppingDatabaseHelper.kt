@@ -691,6 +691,69 @@ class ShoppingDatabaseHelper(context: Context) :
         return result
     }
 
+    fun buildPurchasesCsv(referenceMonth: String? = null): JSONObject {
+        val csvBuilder = StringBuilder()
+        csvBuilder.appendLine(
+            listOf(
+                "mes_referencia",
+                "mercado",
+                "compra_id",
+                "produto",
+                "produto_normalizado",
+                "quantidade",
+                "preco_unitario",
+                "preco_final_item",
+                "total_compra"
+            ).joinToString(",")
+        )
+
+        val selection = if (referenceMonth.isNullOrBlank()) null else "p.reference_month = ?"
+        val selectionArgs = if (referenceMonth.isNullOrBlank()) null else arrayOf(referenceMonth)
+        var rowCount = 0
+
+        readableDatabase.rawQuery(
+            """
+            SELECT
+                p.reference_month,
+                m.name,
+                p.id,
+                pi.product_name,
+                pi.normalized_name,
+                pi.quantity,
+                pi.unit_price,
+                pi.final_price,
+                p.total_amount
+            FROM purchases p
+            INNER JOIN markets m ON m.id = p.market_id
+            INNER JOIN purchase_items pi ON pi.purchase_id = p.id
+            ${if (selection != null) "WHERE $selection" else ""}
+            ORDER BY p.reference_month ASC, m.name ASC, p.id ASC, pi.id ASC
+            """.trimIndent(),
+            selectionArgs
+        ).use { cursor ->
+            while (cursor.moveToNext()) {
+                csvBuilder.appendLine(
+                    listOf(
+                        escapeCsvValue(cursor.getString(0)),
+                        escapeCsvValue(cursor.getString(1)),
+                        escapeCsvValue(cursor.getLong(2).toString()),
+                        escapeCsvValue(cursor.getString(3)),
+                        escapeCsvValue(cursor.getString(4)),
+                        escapeCsvValue(cursor.getDouble(5).toString()),
+                        escapeCsvValue(cursor.getDouble(6).toString()),
+                        escapeCsvValue(cursor.getDouble(7).toString()),
+                        escapeCsvValue(cursor.getDouble(8).toString())
+                    ).joinToString(",")
+                )
+                rowCount += 1
+            }
+        }
+
+        return JSONObject()
+            .put("rowCount", rowCount)
+            .put("content", csvBuilder.toString())
+    }
+
     private fun findMarketIdByName(name: String): Long? {
         if (name.isBlank()) {
             return null
@@ -804,6 +867,11 @@ class ShoppingDatabaseHelper(context: Context) :
         val collapsedSpaces = value.lowercase().trim().replace(Regex("\\s+"), " ")
         val normalized = Normalizer.normalize(collapsedSpaces, Normalizer.Form.NFD)
         return normalized.replace(Regex("\\p{InCombiningDiacriticalMarks}+"), "")
+    }
+
+    private fun escapeCsvValue(value: String?): String {
+        val safeValue = value.orEmpty().replace("\"", "\"\"")
+        return "\"$safeValue\""
     }
 
     private fun backfillNormalizedNames(db: SQLiteDatabase) {

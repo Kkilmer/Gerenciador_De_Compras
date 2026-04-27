@@ -255,6 +255,11 @@ h3 {
     gap: 16px;
 }
 
+.export-grid {
+    display: grid;
+    gap: 16px;
+}
+
 label,
 .item-row {
     display: grid;
@@ -559,6 +564,14 @@ button:hover {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
+}
+
+.export-actions {
+    align-items: end;
+}
+
+.export-status {
+    margin-top: 16px;
 }
 
 .highlight-card {

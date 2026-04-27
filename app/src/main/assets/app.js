@@ -684,6 +684,36 @@ function loadComparison(month = document.getElementById("comparisonMonthInput").
     }
 }
 
+function exportMonthlyCsv() {
+    const month = document.getElementById("exportMonthInput")?.value || "";
+    const status = document.getElementById("exportStatus");
+
+    if (!month) {
+        status.textContent = "Escolha um mês para exportar.";
+        return;
+    }
+
+    if (!window.AndroidBridge || !window.AndroidBridge.exportMonthlyCsv) {
+        status.textContent = "A exportação CSV funciona no app Android.";
+        return;
+    }
+
+    const response = JSON.parse(window.AndroidBridge.exportMonthlyCsv(month));
+    status.textContent = response.message || "Exportação concluída.";
+}
+
+function exportAllCsv() {
+    const status = document.getElementById("exportStatus");
+
+    if (!window.AndroidBridge || !window.AndroidBridge.exportAllCsv) {
+        status.textContent = "A exportação CSV funciona no app Android.";
+        return;
+    }
+
+    const response = JSON.parse(window.AndroidBridge.exportAllCsv());
+    status.textContent = response.message || "Exportação concluída.";
+}
+
 function registerEvents() {
     document.getElementById("addMarketBtn").addEventListener("click", () => {
         const input = document.getElementById("newMarketInput");
@@ -720,6 +750,8 @@ function registerEvents() {
     });
     document.getElementById("loadComparisonBtn").addEventListener("click", () => loadComparison());
     document.getElementById("cancelEditBtn").addEventListener("click", clearForm);
+    document.getElementById("exportMonthCsvBtn").addEventListener("click", exportMonthlyCsv);
+    document.getElementById("exportAllCsvBtn").addEventListener("click", exportAllCsv);
     document.getElementById("calculateBtn").insertAdjacentHTML(
         "afterend",
         '<button id="savePurchaseBtn" type="button">Salvar compra</button>'
@@ -731,6 +763,7 @@ function init() {
     const currentMonth = getCurrentMonthValue();
     document.getElementById("monthInput").value = currentMonth;
     document.getElementById("comparisonMonthInput").value = currentMonth;
+    document.getElementById("exportMonthInput").value = currentMonth;
     document.getElementById("currentMonthBadge").textContent = `Mês atual: ${currentMonth}`;
     document.getElementById("heroCurrentMonth").textContent = currentMonth;
 

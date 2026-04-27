@@ -184,6 +184,28 @@
                         Nenhum cálculo realizado ainda.
                     </div>
                 </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <p class="section-kicker">Relatórios</p>
+                            <h2>Exportar CSV</h2>
+                        </div>
+                    </div>
+                    <div class="export-grid">
+                        <label>
+                            <span>Mês para exportar</span>
+                            <input id="exportMonthInput" type="month">
+                        </label>
+                        <div class="action-row export-actions">
+                            <button id="exportMonthCsvBtn" type="button">Exportar mês</button>
+                            <button id="exportAllCsvBtn" type="button">Exportar tudo</button>
+                        </div>
+                    </div>
+                    <div id="exportStatus" class="summary-card export-status">
+                        Escolha um mês ou exporte todo o histórico.
+                    </div>
+                </section>
             </div>
 
             <aside class="side-column">
