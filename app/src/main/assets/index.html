@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Compras</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="app-shell">
+        <section class="hero-card">
+            <div class="hero-copy-block">
+                <p class="eyebrow">Controle mensal</p>
+                <h1>Gerenciador de Compras</h1>
+                <p class="hero-copy">
+                    Registre compras por mercado, acompanhe o mês atual e compare os preços
+                    dos produtos para descobrir onde compensa mais comprar.
+                </p>
+            </div>
+            <div class="hero-stats">
+                <article class="hero-stat">
+                    <span class="stat-label">Mês em foco</span>
+                    <strong id="heroCurrentMonth">--</strong>
+                </article>
+                <article class="hero-stat">
+                    <span class="stat-label">Total da compra</span>
+                    <strong id="heroTotalValue">R$ 0,00</strong>
+                </article>
+                <article class="hero-stat">
+                    <span class="stat-label">Mercados</span>
+                    <strong id="heroMarketCount">0</strong>
+                </article>
+            </div>
+        </section>
+
+        <section class="panel dashboard-overview-panel">
+            <div class="panel-header">
+                <div>
+                    <p class="section-kicker">Dashboard geral</p>
+                    <h2>Visão do mês</h2>
+                </div>
+                <span class="muted">Resumo executivo do período atual</span>
+            </div>
+
+            <div id="overviewMetrics" class="overview-metrics">
+                <article class="metric-card">
+                    <span>Total mês atual</span>
+                    <strong id="metricCurrentTotal">R$ 0,00</strong>
+                </article>
+                <article class="metric-card">
+                    <span>Total mês anterior</span>
+                    <strong id="metricPreviousTotal">R$ 0,00</strong>
+                </article>
+                <article class="metric-card">
+                    <span>Variação percentual</span>
+                    <strong id="metricVariationPercent">0,0%</strong>
+                </article>
+                <article class="metric-card">
+                    <span>Mercado mais barato</span>
+                    <strong id="metricBestMarket">--</strong>
+                </article>
+                <article class="metric-card">
+                    <span>Maior aumento</span>
+                    <strong id="metricHighestIncrease">--</strong>
+                </article>
+                <article class="metric-card">
+                    <span>Maior queda</span>
+                    <strong id="metricBiggestDrop">--</strong>
+                </article>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="subpanel">
+                    <h3>Evolução de gastos por mês</h3>
+                    <div id="monthlyTrendChart" class="chart-card">
+                        Sem gráfico ainda.
+                    </div>
+                    <div id="monthlyTrendLegend" class="chart-legend">
+                        Sem dados ainda.
+                    </div>
+                </div>
+                <div class="subpanel">
+                    <h3>Mercados do mês atual</h3>
+                    <div id="dashboardMarketChart" class="chart-card">
+                        Sem gráfico ainda.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="dashboard-grid">
+            <div class="main-column">
+                <section class="panel featured-panel">
+                    <div class="panel-header">
+                        <div>
+                            <p class="section-kicker">Lançamento</p>
+                            <h2>Cadastro de compra</h2>
+                        </div>
+                        <span id="currentMonthBadge" class="month-badge"></span>
+                    </div>
+
+                    <div id="editBanner" class="edit-banner hidden">
+                        Editando uma compra salva.
+                        <button id="cancelEditBtn" type="button">Cancelar edição</button>
+                    </div>
+
+                    <div class="grid">
+                        <label>
+                            <span>Mês de referência</span>
+                            <input id="monthInput" type="month">
+                        </label>
+
+                        <label>
+                            <span>Mercado</span>
+                            <select id="marketSelect"></select>
+                        </label>
+                    </div>
+
+                    <div class="market-inline">
+                        <input id="newMarketInput" type="text" placeholder="Cadastrar novo mercado">
+                        <button id="addMarketBtn" type="button">Adicionar mercado</button>
+                    </div>
+
+                    <div class="items-header">
+                        <div>
+                            <p class="section-kicker">Itens</p>
+                            <h3>Produtos da compra</h3>
+                        </div>
+                        <button id="addItemBtn" type="button">Adicionar item</button>
+                    </div>
+
+                    <div id="itemsContainer" class="items-container"></div>
+
+                    <div class="totals-card">
+                        <div>
+                            <span class="muted">Total da compra</span>
+                            <strong id="totalPurchaseValue">R$ 0,00</strong>
+                        </div>
+                        <div class="action-row">
+                            <button id="calculateBtn" type="button">Calcular resumo</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <div>
+                            <p class="section-kicker">Análise rápida</p>
+                            <h2>Resumo</h2>
+                        </div>
+                    </div>
+                    <div id="summaryContainer" class="summary-card">
+                        Nenhum cálculo realizado ainda.
+                    </div>
+                </section>
+            </div>
+
+            <aside class="side-column">
+                <section class="panel compact-panel">
+                    <div class="panel-header">
+                        <div>
+                            <p class="section-kicker">Histórico</p>
+                            <h2>Compras salvas</h2>
+                        </div>
+                        <button id="refreshHistoryBtn" type="button">Atualizar</button>
+                    </div>
+                    <div class="history-filters">
+                        <label>
+                            <span>Mês</span>
+                            <input id="historyMonthFilter" type="month">
+                        </label>
+                        <label>
+                            <span>Mercado</span>
+                            <select id="historyMarketFilter"></select>
+                        </label>
+                        <label>
+                            <span>Produto</span>
+                            <input id="historyProductFilter" type="text" placeholder="Ex.: arroz">
+                        </label>
+                        <div class="history-actions">
+                            <button id="applyHistoryFiltersBtn" type="button">Aplicar</button>
+                            <button id="clearHistoryFiltersBtn" type="button">Limpar</button>
+                        </div>
+                    </div>
+                    <div id="historyContainer" class="history-list">
+                        Nenhuma compra salva ainda.
+                    </div>
+                </section>
+            </aside>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="section-kicker">Comparativo</p>
+                    <h2>Comparação do mês</h2>
+                </div>
+                <span class="muted">Veja qual mercado e produto compensam mais</span>
+            </div>
+
+            <div class="comparison-toolbar">
+                <label>
+                    <span>Mês para comparar</span>
+                    <input id="comparisonMonthInput" type="month">
+                </label>
+                <button id="loadComparisonBtn" type="button">Comparar mês</button>
+            </div>
+
+            <div id="comparisonSummary" class="summary-card emphasis-card">
+                Escolha um mês e carregue a comparação.
+            </div>
+
+            <div class="comparison-grid">
+                <div class="subpanel">
+                    <h3>Mercados do mês</h3>
+                    <div id="marketComparisonChart" class="chart-card">
+                        Sem gráfico ainda.
+                    </div>
+                    <div id="marketComparisonContainer" class="history-list">
+                        Sem dados ainda.
+                    </div>
+                </div>
+                <div class="subpanel">
+                    <h3>Produtos comparados</h3>
+                    <div id="productComparisonContainer" class="history-list">
+                        Sem dados ainda.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="section-kicker">Evolução</p>
+                    <h2>Mês atual x mês anterior</h2>
+                </div>
+                <span class="muted">Entenda se os gastos subiram ou caíram</span>
+            </div>
+
+            <div id="monthVsPreviousSummary" class="summary-card emphasis-card">
+                Escolha um mês na comparação acima para ver a evolução.
+            </div>
+
+            <div class="comparison-grid">
+                <div class="subpanel">
+                    <h3>Mercados entre meses</h3>
+                    <div id="marketMonthChangeChart" class="chart-card">
+                        Sem gráfico ainda.
+                    </div>
+                    <div id="marketMonthChangeContainer" class="history-list">
+                        Sem dados ainda.
+                    </div>
+                </div>
+                <div class="subpanel">
+                    <h3>Produtos que mudaram</h3>
+                    <div id="productMonthChangeContainer" class="history-list">
+                        Sem dados ainda.
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+:root {
+    --bg: #f2ebdf;
+    --surface: rgba(255, 251, 245, 0.94);
+    --surface-strong: #fffaf3;
+    --surface-accent: #f6efe3;
+    --text: #2f241c;
+    --muted: #7a6a5e;
+    --accent: #117a58;
+    --accent-strong: #0c5e43;
+    --accent-soft: rgba(17, 122, 88, 0.12);
+    --warm: #cc8b3c;
+    --border: rgba(87, 65, 46, 0.14);
+    --danger: #b7483b;
+    --shadow: 0 24px 60px rgba(63, 43, 26, 0.12);
+    --radius-lg: 28px;
+    --radius-md: 18px;
+    --radius-sm: 14px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Segoe UI", sans-serif;
+    color: var(--text);
+    background:
+        radial-gradient(circle at top left, rgba(17, 122, 88, 0.2), transparent 30%),
+        radial-gradient(circle at top right, rgba(204, 139, 60, 0.18), transparent 22%),
+        linear-gradient(180deg, #f9f4ec 0%, #ecdfcf 100%);
+}
+
+.app-shell {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 22px 18px 32px;
+    display: grid;
+    gap: 18px;
+}
+
+.hero-card,
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+}
+
+.hero-card {
+    padding: 24px;
+    display: grid;
+    gap: 18px;
+}
+
+.hero-copy-block {
+    max-width: 700px;
+}
+
+.eyebrow,
+.section-kicker {
+    margin: 0 0 8px;
+    color: var(--accent-strong);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 11px;
+}
+
+h1,
+h2,
+h3,
+p {
+    margin-top: 0;
+}
+
+h1 {
+    margin-bottom: 10px;
+    font-size: clamp(28px, 5vw, 42px);
+    line-height: 1.04;
+}
+
+h2 {
+    margin-bottom: 0;
+    font-size: 24px;
+}
+
+h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.hero-copy,
+.muted {
+    color: var(--muted);
+}
+
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.hero-stat {
+    padding: 16px;
+    border-radius: 20px;
+    background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(246, 239, 227, 0.92));
+    border: 1px solid rgba(17, 122, 88, 0.12);
+}
+
+.stat-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.hero-stat strong {
+    font-size: 22px;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.9fr);
+    gap: 18px;
+    align-items: start;
+}
+
+.main-column,
+.side-column {
+    display: grid;
+    gap: 18px;
+}
+
+.panel {
+    padding: 22px;
+}
+
+.featured-panel {
+    background:
+        linear-gradient(180deg, rgba(255, 251, 245, 0.98), rgba(247, 240, 231, 0.92));
+}
+
+.compact-panel {
+    position: sticky;
+    top: 18px;
+}
+
+.subpanel {
+    padding: 18px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.46);
+    border: 1px solid rgba(90, 67, 48, 0.1);
+}
+
+.dashboard-overview-panel {
+    display: grid;
+    gap: 18px;
+}
+
+.overview-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+}
+
+.metric-card {
+    padding: 16px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.92), rgba(246,239,227,0.9));
+    border: 1px solid rgba(17, 122, 88, 0.12);
+}
+
+.metric-card span {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.metric-card strong {
+    font-size: 20px;
+    line-height: 1.2;
+}
+
+.panel-header,
+.items-header,
+.totals-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.month-badge {
+    background: var(--accent-soft);
+    color: var(--accent-strong);
+    padding: 9px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+label,
+.item-row {
+    display: grid;
+    gap: 8px;
+}
+
+label span {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+}
+
+input,
+select,
+button {
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    padding: 13px 14px;
+    font-size: 15px;
+}
+
+input,
+select {
+    background: var(--surface-strong);
+    color: var(--text);
+}
+
+button {
+    background: var(--accent);
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+    box-shadow: 0 10px 20px rgba(17, 122, 88, 0.18);
+}
+
+button:hover {
+    background: var(--accent-strong);
+    transform: translateY(-1px);
+}
+
+.market-inline {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+}
+
+.edit-banner {
+    margin-bottom: 16px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(17, 122, 88, 0.22);
+    background: rgba(17, 122, 88, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.hidden {
+    display: none;
+}
+
+.items-container {
+    display: grid;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.item-row {
+    grid-template-columns: 2fr 1fr 1fr auto;
+    align-items: end;
+    padding: 16px;
+    border: 1px solid rgba(87, 65, 46, 0.12);
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+.item-total {
+    margin: 6px 0 10px;
+    font-weight: 800;
+    font-size: 18px;
+}
+
+.totals-card {
+    margin-top: 8px;
+    padding: 18px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(17, 122, 88, 0.1), rgba(255, 255, 255, 0.7));
+    border: 1px solid rgba(17, 122, 88, 0.12);
+}
+
+#totalPurchaseValue {
+    font-size: 28px;
+}
+
+.summary-card {
+    border: 1px dashed rgba(87, 65, 46, 0.16);
+    border-radius: 20px;
+    padding: 18px;
+    background: rgba(255, 255, 255, 0.62);
+    color: var(--text);
+    white-space: pre-wrap;
+    line-height: 1.55;
+}
+
+.emphasis-card {
+    background:
+        linear-gradient(135deg, rgba(17, 122, 88, 0.08), rgba(255, 255, 255, 0.72));
+    border-style: solid;
+}
+
+.history-list {
+    display: grid;
+    gap: 12px;
+}
+
+.chart-card {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 14px;
+    padding: 14px;
+    border-radius: 18px;
+    border: 1px solid rgba(87, 65, 46, 0.12);
+    background: rgba(255, 255, 255, 0.72);
+}
+
+.chart-legend {
+    display: grid;
+    gap: 8px;
+}
+
+.chart-row {
+    display: grid;
+    gap: 6px;
+}
+
+.line-chart-svg {
+    width: 100%;
+    height: 180px;
+    display: block;
+}
+
+.line-chart-path {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.line-chart-area {
+    fill: rgba(17, 122, 88, 0.12);
+}
+
+.line-chart-point {
+    fill: white;
+    stroke: var(--accent);
+    stroke-width: 3;
+}
+
+.chart-legend-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.68);
+    border: 1px solid rgba(87, 65, 46, 0.1);
+    font-size: 13px;
+}
+
+.chart-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.chart-track {
+    height: 12px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(17, 122, 88, 0.08);
+}
+
+.chart-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--accent), #39a07c);
+}
+
+.chart-fill.warm {
+    background: linear-gradient(90deg, var(--warm), #e2ab67);
+}
+
+.history-card {
+    border: 1px solid rgba(87, 65, 46, 0.12);
+    border-radius: 18px;
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.74);
+}
+
+.history-card strong,
+.history-card span {
+    display: block;
+}
+
+.history-card strong {
+    margin-bottom: 6px;
+    font-size: 17px;
+}
+
+.comparison-toolbar,
+.comparison-grid,
+.history-filters {
+    display: grid;
+    gap: 16px;
+}
+
+.history-filters {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    margin-bottom: 16px;
+}
+
+.comparison-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    margin-top: 16px;
+}
+
+.history-actions,
+.action-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.highlight-card {
+    border: 1px solid rgba(17, 122, 88, 0.22);
+    background: rgba(17, 122, 88, 0.08);
+}
+
+.danger-btn {
+    background: var(--danger);
+    box-shadow: 0 10px 20px rgba(183, 72, 59, 0.16);
+}
+
+.danger-btn:hover {
+    background: #97352b;
+}
+
+@media (max-width: 980px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .compact-panel {
+        position: static;
+    }
+}
+
+@media (max-width: 720px) {
+    .app-shell {
+        padding: 14px 12px 26px;
+    }
+
+    .panel,
+    .hero-card {
+        padding: 18px;
+        border-radius: 24px;
+    }
+
+    .panel-header,
+    .items-header,
+    .totals-card,
+    .market-inline,
+    .item-row,
+    .edit-banner {
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .item-row {
+        gap: 12px;
+    }
+
+    #totalPurchaseValue {
+        font-size: 24px;
+    }
+}
