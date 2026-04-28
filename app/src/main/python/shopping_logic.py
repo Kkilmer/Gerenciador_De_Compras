@@ -18,6 +18,11 @@ def _normalize_name(value):
     return "".join(char for char in text if unicodedata.category(char) != "Mn")
 
 
+def _normalize_item_type(value):
+    item_type = str(value or "unit").strip().lower()
+    return "weight" if item_type == "weight" else "unit"
+
+
 def process_purchase_json(payload: str) -> str:
     data = json.loads(payload)
     items = data.get("items", [])
@@ -31,6 +36,7 @@ def process_purchase_json(payload: str) -> str:
     for item in items:
         name = item.get("name", "").strip()
         normalized_name = _normalize_name(name)
+        item_type = _normalize_item_type(item.get("itemType"))
         quantity = _to_float(item.get("quantity"))
         unit_price = _to_float(item.get("unitPrice"))
         final_price = round(quantity * unit_price, 2)
@@ -43,6 +49,7 @@ def process_purchase_json(payload: str) -> str:
             {
                 "name": name,
                 "normalizedName": normalized_name,
+                "itemType": item_type,
                 "quantity": quantity,
                 "unitPrice": round(unit_price, 2),
                 "finalPrice": final_price,

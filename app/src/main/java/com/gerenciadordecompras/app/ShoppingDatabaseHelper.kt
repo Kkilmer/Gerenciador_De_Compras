@@ -44,6 +44,7 @@ class ShoppingDatabaseHelper(context: Context) :
                 purchase_id INTEGER NOT NULL,
                 product_name TEXT NOT NULL,
                 normalized_name TEXT NOT NULL,
+                item_type TEXT NOT NULL DEFAULT 'unit',
                 quantity REAL NOT NULL,
                 unit_price REAL NOT NULL,
                 final_price REAL NOT NULL,
@@ -61,6 +62,12 @@ class ShoppingDatabaseHelper(context: Context) :
                 "ALTER TABLE purchase_items ADD COLUMN normalized_name TEXT NOT NULL DEFAULT ''"
             )
             backfillNormalizedNames(db)
+        }
+
+        if (oldVersion < 3) {
+            db.execSQL(
+                "ALTER TABLE purchase_items ADD COLUMN item_type TEXT NOT NULL DEFAULT 'unit'"
+            )
         }
     }
 
@@ -140,6 +147,7 @@ class ShoppingDatabaseHelper(context: Context) :
                     put("purchase_id", purchaseId)
                     put("product_name", productName)
                     put("normalized_name", normalizeProductName(productName))
+                    put("item_type", normalizeItemType(item.optString("itemType")))
                     put("quantity", item.optDouble("quantity", 0.0))
                     put("unit_price", item.optDouble("unitPrice", 0.0))
                     put("final_price", item.optDouble("finalPrice", 0.0))
@@ -180,7 +188,7 @@ class ShoppingDatabaseHelper(context: Context) :
         val items = JSONArray()
         readableDatabase.rawQuery(
             """
-            SELECT id, product_name, quantity, unit_price, final_price
+            SELECT id, product_name, item_type, quantity, unit_price, final_price
             FROM purchase_items
             WHERE purchase_id = ?
             ORDER BY id ASC
@@ -192,9 +200,10 @@ class ShoppingDatabaseHelper(context: Context) :
                     JSONObject()
                         .put("itemId", cursor.getLong(0))
                         .put("name", cursor.getString(1))
-                        .put("quantity", cursor.getDouble(2))
-                        .put("unitPrice", cursor.getDouble(3))
-                        .put("finalPrice", cursor.getDouble(4))
+                        .put("itemType", normalizeItemType(cursor.getString(2)))
+                        .put("quantity", cursor.getDouble(3))
+                        .put("unitPrice", cursor.getDouble(4))
+                        .put("finalPrice", cursor.getDouble(5))
                 )
             }
         }
@@ -228,6 +237,7 @@ class ShoppingDatabaseHelper(context: Context) :
                     put("purchase_id", purchaseId)
                     put("product_name", productName)
                     put("normalized_name", normalizeProductName(productName))
+                    put("item_type", normalizeItemType(item.optString("itemType")))
                     put("quantity", item.optDouble("quantity", 0.0))
                     put("unit_price", item.optDouble("unitPrice", 0.0))
                     put("final_price", item.optDouble("finalPrice", 0.0))
@@ -700,6 +710,7 @@ class ShoppingDatabaseHelper(context: Context) :
                 "compra_id",
                 "produto",
                 "produto_normalizado",
+                "tipo_item",
                 "quantidade",
                 "preco_unitario",
                 "preco_final_item",
@@ -719,6 +730,7 @@ class ShoppingDatabaseHelper(context: Context) :
                 p.id,
                 pi.product_name,
                 pi.normalized_name,
+                pi.item_type,
                 pi.quantity,
                 pi.unit_price,
                 pi.final_price,
@@ -739,10 +751,11 @@ class ShoppingDatabaseHelper(context: Context) :
                         escapeCsvValue(cursor.getLong(2).toString()),
                         escapeCsvValue(cursor.getString(3)),
                         escapeCsvValue(cursor.getString(4)),
-                        escapeCsvValue(cursor.getDouble(5).toString()),
+                        escapeCsvValue(normalizeItemType(cursor.getString(5))),
                         escapeCsvValue(cursor.getDouble(6).toString()),
                         escapeCsvValue(cursor.getDouble(7).toString()),
-                        escapeCsvValue(cursor.getDouble(8).toString())
+                        escapeCsvValue(cursor.getDouble(8).toString()),
+                        escapeCsvValue(cursor.getDouble(9).toString())
                     ).joinToString(",")
                 )
                 rowCount += 1
@@ -869,6 +882,10 @@ class ShoppingDatabaseHelper(context: Context) :
         return normalized.replace(Regex("\\p{InCombiningDiacriticalMarks}+"), "")
     }
 
+    private fun normalizeItemType(value: String?): String {
+        return if (value?.trim()?.lowercase() == "weight") "weight" else "unit"
+    }
+
     private fun escapeCsvValue(value: String?): String {
         val safeValue = value.orEmpty().replace("\"", "\"\"")
         return "\"$safeValue\""
@@ -901,6 +918,6 @@ class ShoppingDatabaseHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "shopping_manager.db"
-        private const val DATABASE_VERSION = 2
+        private const val DATABASE_VERSION = 3
     }
 }
