@@ -38,7 +38,7 @@
                     <p class="section-kicker">Comece por aqui</p>
                     <h2>Resumo do mês</h2>
                     <p class="section-helper">
-                        Veja rapidamente quanto você já gastou, qual mercado compensou mais e para onde ir agora.
+                        Veja quanto já foi gasto no mês, quantas compras foram lançadas e como os valores estão divididos entre os mercados.
                     </p>
                 </div>
                 <div class="hero-stats">
@@ -47,31 +47,17 @@
                         <strong id="heroCurrentMonth">--</strong>
                     </article>
                     <article class="hero-stat">
-                        <span class="stat-label">Total da compra atual</span>
-                        <strong id="heroTotalValue">R$ 0,00</strong>
+                        <span class="stat-label">Total geral do mês</span>
+                        <strong id="heroMonthTotal">R$ 0,00</strong>
                     </article>
                     <article class="hero-stat">
-                        <span class="stat-label">Mercados cadastrados</span>
-                        <strong id="heroMarketCount">0</strong>
+                        <span class="stat-label">Compras no mês</span>
+                        <strong id="heroPurchaseCount">0</strong>
                     </article>
-                </div>
-                <div class="quick-actions-grid">
-                    <button type="button" class="shortcut-card" data-tab-jump="purchase">
-                        <strong>Registrar compra</strong>
-                        <span>Lançe uma compra nova com poucos toques.</span>
-                    </button>
-                    <button type="button" class="shortcut-card" data-tab-jump="history">
-                        <strong>Ver histórico</strong>
-                        <span>Encontre compras salvas, filtre e edite.</span>
-                    </button>
-                    <button type="button" class="shortcut-card" data-tab-jump="comparisons">
-                        <strong>Comparar preços</strong>
-                        <span>Descubra o mercado mais barato e o que mudou.</span>
-                    </button>
-                    <button type="button" class="shortcut-card" data-tab-jump="markets">
-                        <strong>Gerenciar mercados</strong>
-                        <span>Cadastre e consulte os mercados da sua lista.</span>
-                    </button>
+                    <article class="hero-stat">
+                        <span class="stat-label">Itens no mês</span>
+                        <strong id="heroItemCount">0</strong>
+                    </article>
                 </div>
             </section>
 
@@ -80,7 +66,7 @@
                     <div>
                         <p class="section-kicker">Painel geral</p>
                         <h2>Visão do mês</h2>
-                        <p class="section-helper">Um resumo simples para entender o período atual sem rolar a tela inteira.</p>
+                        <p class="section-helper">O total do mês soma todas as compras registradas no período, mesmo quando foram feitas em mercados diferentes.</p>
                     </div>
                     <span class="muted">Atualizado com base no mês em comparação</span>
                 </div>
@@ -110,6 +96,36 @@
                         <span>Maior queda</span>
                         <strong id="metricBiggestDrop">--</strong>
                     </article>
+                </div>
+
+                <div class="comparison-grid">
+                    <div class="subpanel">
+                        <h3>Total por mercado no mês</h3>
+                        <div id="homeMarketTotalsList" class="history-list">
+                            Os totais por mercado aparecerão aqui.
+                        </div>
+                    </div>
+                    <div class="subpanel">
+                        <h3>Resumo rápido do período</h3>
+                        <div class="purchase-glance-grid">
+                            <article class="glance-card">
+                                <span>Mercados com compras</span>
+                                <strong id="homeMarketCount">0</strong>
+                            </article>
+                            <article class="glance-card">
+                                <span>Total do mês</span>
+                                <strong id="homeMonthTotal">R$ 0,00</strong>
+                            </article>
+                            <article class="glance-card">
+                                <span>Compras registradas</span>
+                                <strong id="homePurchaseCount">0</strong>
+                            </article>
+                            <article class="glance-card">
+                                <span>Itens lançados</span>
+                                <strong id="homeItemCount">0</strong>
+                            </article>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="comparison-grid">

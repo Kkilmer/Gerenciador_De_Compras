@@ -421,10 +421,6 @@ function getPurchasePayload() {
 function updateTotalView() {
     const total = state.items.reduce((sum, item) => sum + getItemTotal(item), 0);
     document.getElementById("totalPurchaseValue").textContent = currencyFormatter.format(total);
-    const heroTotalValue = document.getElementById("heroTotalValue");
-    if (heroTotalValue) {
-        heroTotalValue.textContent = currencyFormatter.format(total);
-    }
 
     const currentPurchaseTotal = document.getElementById("currentPurchaseTotal");
     if (currentPurchaseTotal) {
@@ -1310,11 +1306,6 @@ function loadMarkets() {
     }
 
     renderMarkets();
-
-    const heroMarketCount = document.getElementById("heroMarketCount");
-    if (heroMarketCount) {
-        heroMarketCount.textContent = String(state.markets.length);
-    }
 }
 
 function showMarketFeedback(message) {
@@ -1520,13 +1511,46 @@ function formatSignedPercent(value) {
     return `${prefix}${value.toFixed(1)}%`;
 }
 
+function renderHomeMarketTotals(entries) {
+    const container = document.getElementById("homeMarketTotalsList");
+    if (!container) {
+        return;
+    }
+
+    if (!entries.length) {
+        container.textContent = "Salve compras nesse mês para ver o total separado por mercado.";
+        return;
+    }
+
+    container.innerHTML = "";
+    entries.forEach((entry, index) => {
+        const card = document.createElement("div");
+        card.className = `history-card${index === 0 ? " highlight-card" : ""}`;
+        card.innerHTML = `
+            <strong>${entry.market}</strong>
+            <span>Total no mês: ${currencyFormatter.format(entry.monthTotal || 0)}</span>
+            <span>Compras registradas: ${entry.purchaseCount || 0}</span>
+        `;
+        container.appendChild(card);
+    });
+}
+
 function renderDashboardOverview(data) {
+    const summary = data.monthSummary || {};
     document.getElementById("metricCurrentTotal").textContent = currencyFormatter.format(data.currentTotal || 0);
     document.getElementById("metricPreviousTotal").textContent = currencyFormatter.format(data.previousTotal || 0);
     document.getElementById("metricVariationPercent").textContent = formatSignedPercent(data.differencePercent || 0);
     document.getElementById("metricBestMarket").textContent = data.bestMarket?.market || "--";
     document.getElementById("metricHighestIncrease").textContent = data.highestIncrease?.product || "--";
     document.getElementById("metricBiggestDrop").textContent = data.biggestDrop?.product || "--";
+    document.getElementById("heroCurrentMonth").textContent = data.currentMonth || "--";
+    document.getElementById("heroMonthTotal").textContent = currencyFormatter.format(data.currentTotal || 0);
+    document.getElementById("heroPurchaseCount").textContent = String(summary.purchaseCount || 0);
+    document.getElementById("heroItemCount").textContent = String(summary.itemCount || 0);
+    document.getElementById("homeMonthTotal").textContent = currencyFormatter.format(data.currentTotal || 0);
+    document.getElementById("homePurchaseCount").textContent = String(summary.purchaseCount || 0);
+    document.getElementById("homeItemCount").textContent = String(summary.itemCount || 0);
+    document.getElementById("homeMarketCount").textContent = String(summary.marketCount || 0);
 
     renderLineChart(
         document.getElementById("monthlyTrendChart"),
@@ -1548,6 +1572,7 @@ function renderDashboardOverview(data) {
         }))
     );
 
+    renderHomeMarketTotals(data.marketBars || []);
     renderMarketHistoricalRanking(data.marketHistoricalRanking || []);
     renderPriceAlerts(data.priceAlerts || {});
 }

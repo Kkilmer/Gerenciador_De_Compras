@@ -563,6 +563,7 @@ class ShoppingDatabaseHelper(context: Context) :
         val productChanges = compareWithPreviousMonth(referenceMonth)
         val bestMarket = monthlyComparison.optJSONObject("bestMarket")
         val priceAlerts = buildPriceAlerts(productChanges.optJSONArray("productChanges") ?: JSONArray())
+        val monthSummary = getMonthSummary(referenceMonth)
 
         return JSONObject()
             .put("currentMonth", referenceMonth)
@@ -573,6 +574,7 @@ class ShoppingDatabaseHelper(context: Context) :
             .put("bestMarket", bestMarket)
             .put("highestIncrease", productChanges.optJSONObject("highestIncrease"))
             .put("biggestDrop", productChanges.optJSONObject("biggestDrop"))
+            .put("monthSummary", monthSummary)
             .put("monthlySpendingTrend", getMonthlySpendingTrend())
             .put("marketBars", monthlyComparison.optJSONArray("markets") ?: JSONArray())
             .put("marketHistoricalRanking", getMarketHistoricalRanking())
@@ -799,6 +801,34 @@ class ShoppingDatabaseHelper(context: Context) :
             }
         }
         return 0.0
+    }
+
+    private fun getMonthSummary(month: String): JSONObject {
+        val result = JSONObject()
+            .put("purchaseCount", 0)
+            .put("itemCount", 0)
+            .put("marketCount", 0)
+
+        readableDatabase.rawQuery(
+            """
+            SELECT
+                COUNT(DISTINCT p.id) AS purchase_count,
+                COUNT(pi.id) AS item_count,
+                COUNT(DISTINCT p.market_id) AS market_count
+            FROM purchases p
+            LEFT JOIN purchase_items pi ON pi.purchase_id = p.id
+            WHERE p.reference_month = ?
+            """.trimIndent(),
+            arrayOf(month)
+        ).use { cursor ->
+            if (cursor.moveToFirst()) {
+                result.put("purchaseCount", cursor.getInt(0))
+                result.put("itemCount", cursor.getInt(1))
+                result.put("marketCount", cursor.getInt(2))
+            }
+        }
+
+        return result
     }
 
     private fun getPreviousMonth(month: String): String {
