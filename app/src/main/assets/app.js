@@ -767,8 +767,7 @@ function renderCsvImportPreview() {
 }
 
 function chooseCsvDelimiter(text) {
-    const sampleLines = text
-        .split(/\r?\n/)
+    const sampleLines = splitCsvTextIntoLines(text)
         .map((line) => line.trim())
         .filter((line) => line.length)
         .slice(0, 5);
@@ -788,15 +787,27 @@ function chooseCsvDelimiter(text) {
     return bestDelimiter;
 }
 
+function normalizeCsvText(text) {
+    return String(text ?? "")
+        .replace(/^\uFEFF/, "")
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n");
+}
+
+function splitCsvTextIntoLines(text) {
+    return normalizeCsvText(text).split("\n");
+}
+
 function parseCsvRows(text, delimiter) {
+    const normalizedText = normalizeCsvText(text);
     const rows = [];
     let currentRow = [];
     let currentValue = "";
     let insideQuotes = false;
 
-    for (let index = 0; index < text.length; index += 1) {
-        const char = text[index];
-        const nextChar = text[index + 1];
+    for (let index = 0; index < normalizedText.length; index += 1) {
+        const char = normalizedText[index];
+        const nextChar = normalizedText[index + 1];
 
         if (char === "\"") {
             if (insideQuotes && nextChar === "\"") {
@@ -1068,7 +1079,7 @@ function applyCsvImportSuggestions() {
 function readCsvFile(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result ?? ""));
+        reader.onload = () => resolve(normalizeCsvText(reader.result ?? ""));
         reader.onerror = () => reject(new Error("Não foi possível ler o arquivo CSV."));
         reader.readAsText(file, "utf-8");
     });
@@ -1921,7 +1932,8 @@ function registerEvents() {
 
     document.getElementById("addItemBtn").addEventListener("click", () => addItem());
     document.getElementById("calculateBtn").addEventListener("click", calculateSummary);
-    document.getElementById("selectCsvBtn").addEventListener("click", () => {
+    document.getElementById("selectCsvBtn").addEventListener("click", (event) => {
+        event.preventDefault();
         const fileInput = document.getElementById("csvFileInput");
         if (fileInput instanceof HTMLInputElement) {
             fileInput.click();

@@ -14,6 +14,16 @@ import androidx.activity.OnBackPressedCallback
 
 class MainActivity : AppCompatActivity() {
 
+    companion object {
+        private val CSV_MIME_TYPES = arrayOf(
+            "text/csv",
+            "application/csv",
+            "text/comma-separated-values",
+            "application/vnd.ms-excel",
+            "*/*"
+        )
+    }
+
     private lateinit var webView: WebView
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
     private val fileChooserLauncher = registerForActivityResult(
@@ -45,6 +55,7 @@ class MainActivity : AppCompatActivity() {
         webView.settings.javaScriptEnabled = true
         webView.settings.domStorageEnabled = true
         webView.settings.allowFileAccess = true
+        webView.settings.allowContentAccess = true
         webView.webViewClient = WebViewClient()
         webView.webChromeClient = object : WebChromeClient() {
             override fun onShowFileChooser(
@@ -55,9 +66,11 @@ class MainActivity : AppCompatActivity() {
                 fileChooserCallback?.onReceiveValue(null)
                 fileChooserCallback = filePathCallback
 
-                val chooserIntent = fileChooserParams?.createIntent() ?: Intent(Intent.ACTION_GET_CONTENT).apply {
+                val chooserIntent = Intent(Intent.ACTION_GET_CONTENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "text/*"
+                    type = "*/*"
+                    putExtra(Intent.EXTRA_MIME_TYPES, CSV_MIME_TYPES)
+                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
                 }
 
                 return try {
